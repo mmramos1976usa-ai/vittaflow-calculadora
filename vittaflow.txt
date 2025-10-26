@@ -1,373 +1,182 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VittaFlow – Calculadoras</title>
-  <meta name="description" content="Calculadora VittaFlow: IMC+ (com cintura/altura, % gordura e atividade), TDEE e macronutrientes." />
-  <style>
-    :root{
-      --vf-bg:#f7f8fa;
-      --vf-card:#ffffff;
-      --vf-ink:#1d2939;
-      --vf-sub:#667085;
-      --vf-brand:#0aa3a3;        /* turquesa VittaFlow */
-      --vf-brand-dark:#087d7d;
-      --vf-ok:#16a34a;           /* verde */
-      --vf-warn:#f59e0b;         /* laranja */
-      --vf-bad:#ef4444;          /* vermelho */
-      --radius:14px;
-      --shadow:0 10px 25px rgba(2,18,18,.08);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;background:var(--vf-bg);color:var(--vf-ink);
-      font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial
-    }
-    header{
-      background:linear-gradient(135deg,#efe9d8,#fff5d9 35%,#ffffff 70%);
-      border-bottom:1px solid #eaeef2;
-    }
-    .wrap{max-width:980px;margin:auto;padding:28px 20px}
-    .brand{display:flex;align-items:center;gap:14px}
-    .brand img{width:170px;height:auto;object-fit:contain;filter: drop-shadow(0 6px 14px rgba(212,176,74,.35));}
-    .brand h1{margin:0;font-size:clamp(22px,3.4vw,34px);font-weight:800;letter-spacing:.2px}
-    .grid{display:grid;gap:22px;margin-top:22px}
-    @media(min-width:880px){.grid{grid-template-columns:1fr 1fr}}
-    .card{
-      background:var(--vf-card);border:1px solid #eaeef2;border-radius:var(--radius);
-      box-shadow:var(--shadow);padding:22px
-    }
-    h2{margin:.2rem 0 1rem;font-size:clamp(18px,2.5vw,24px)}
-    label{display:block;margin:.6rem 0 .2rem;color:var(--vf-sub)}
-    input,select,button{font:inherit}
-    input,select{
-      width:100%;max-width:260px;padding:10px 12px;border-radius:10px;border:1px solid #dce3ea;
-      background:#fff;outline:none
-    }
-    input:focus,select:focus{border-color:var(--vf-brand)}
-    .row{display:flex;flex-wrap:wrap;gap:14px;align-items:end}
-    button{
-      cursor:pointer;border:0;border-radius:12px;padding:12px 18px;
-      background:var(--vf-brand);color:#fff;font-weight:700;letter-spacing:.2px;margin-top:10px
-    }
-    button:hover{background:var(--vf-brand-dark)}
-    .muted{color:var(--vf-sub);font-size:.94rem}
-    .result{margin-top:10px;font-weight:700}
-
-    /* Barra IMC */
-    .meter{margin-top:12px;height:14px;border-radius:999px;background:#eef2f6;position:relative;overflow:hidden;max-width:520px}
-    .meter .zones{position:absolute;inset:0;display:grid;grid-template-columns:18.5% 6.5% 5% 5% 65%}
-    .meter .z{opacity:.35}
-    .meter .z.ok{background:var(--vf-ok)}
-    .meter .z.warn{background:var(--vf-warn)}
-    .meter .z.bad{background:var(--vf-bad)}
-    .needle{position:absolute;top:-4px;width:2px;height:22px;background:#111;border-radius:2px;transition:left .25s ease}
-    .legend{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
-    .tag{display:inline-flex;align-items:center;gap:8px;font-size:.9rem;color:var(--vf-sub)}
-    .dot{width:10px;height:10px;border-radius:999px;background:#ccc}
-    .dot.ok{background:var(--vf-ok)} .dot.warn{background:var(--vf-warn)} .dot.bad{background:var(--vf-bad)}
-    /* Tabela simples */
-    .kv{margin-top:8px}
-    .kv div{display:flex;justify-content:space-between;gap:14px;padding:6px 0;border-bottom:1px dashed #edf0f3}
-    .kv div:last-child{border-bottom:0}
-
-    footer{padding:24px 20px;color:var(--vf-sub);text-align:center}
-    .small{font-size:.85rem}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Saúde & Nutrição</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 24px; }
+        h1 { color: #058D5B; }
+        section { background: #fff; border-radius: 7px; padding: 16px; margin-bottom: 24px; box-shadow: 0 2px 5px #ededed; }
+        label { display: block; margin-top: 10px; }
+        input, select { margin-top: 6px; padding: 6px; border-radius: 4px; border: 1px solid #ddd; width: 120px; }
+        button { margin-top: 12px; background: #058D5B; color: #fff; border: none; padding: 10px 24px; border-radius: 5px; cursor: pointer;}
+        button:hover { background: #03593B; }
+        output, .result { font-weight: bold; margin-top: 8px; display: block; }
+        .multicol { display: flex; gap: 30px; flex-wrap: wrap; }
+        .mini { font-size: 0.92em; color: #666; }
+        .logo {text-align:center; margin-bottom:16px;}
+        .logo img {max-width:220px; width:80%; height:auto;}
+    </style>
 </head>
 <body>
-  <header>
-    <div class="wrap brand">
-      <!-- Suba o seu arquivo de logo como 'vittaflow-logo.png' ou troque o src abaixo -->
-      <img src="vittaflow-logo.png" alt="Logo VittaFlow" />
-      <h1>Calculadora Nutrição & Performance</h1>
+    <div class="logo">
+        <img src="WhatsApp-Image-2025-10-25-at-9.33.26-PM.jpg" alt="Logo VittaFlow">
     </div>
-  </header>
-
-  <main class="wrap">
-    <div class="grid">
-      <!-- IMC+ -->
-      <section class="card">
-        <h2>IMC+ (ajustado por cintura/altura, % gordura e atividade)</h2>
-
-        <div class="row">
-          <div>
-            <label for="imc_peso">Peso (kg)</label>
-            <input id="imc_peso" type="number" min="20" max="400" step="0.1" placeholder="Ex.: 80" />
-          </div>
-          <div>
-            <label for="imc_altura">Altura (m)</label>
-            <input id="imc_altura" type="number" min="1.2" max="2.5" step="0.01" placeholder="Ex.: 1.75" />
-          </div>
-          <div>
-            <label for="imc_cintura">Cintura (cm)</label>
-            <input id="imc_cintura" type="number" min="40" max="180" placeholder="Ex.: 85" />
-          </div>
-          <div>
-            <label for="imc_pescoco">Pescoço (cm) <span class="muted">(opcional)</span></label>
-            <input id="imc_pescoco" type="number" min="25" max="60" placeholder="Ex.: 40" />
-          </div>
-          <div id="campo_quadril" style="display:none">
-            <label for="imc_quadril">Quadril (cm) <span class="muted">(mulheres)</span></label>
-            <input id="imc_quadril" type="number" min="60" max="180" placeholder="Ex.: 98" />
-          </div>
-          <div>
-            <label for="imc_atividade">Atividade</label>
-            <select id="imc_atividade">
-              <option>Sedentário</option>
-              <option>Levemente ativo</option>
-              <option>Moderadamente ativo</option>
-              <option>Muito ativo</option>
-            </select>
-          </div>
-          <div>
-            <label for="imc_sexo">Sexo</label>
-            <select id="imc_sexo">
-              <option>Masculino</option>
-              <option>Feminino</option>
-            </select>
-          </div>
-        </div>
-
-        <button id="btnImc">Calcular IMC+</button>
-        <div id="imc_out" class="result">—</div>
-
-        <!-- Barra com faixas e ponteiro -->
-        <div class="meter" aria-hidden="true">
-          <div class="zones">
-            <div class="z warn"></div> <!-- Abaixo do peso -->
-            <div class="z ok"></div>   <!-- Normal -->
-            <div class="z warn"></div> <!-- Sobrepeso -->
-            <div class="z bad"></div>  <!-- Obesidade I -->
-            <div class="z bad"></div>  <!-- Obesidade II/III -->
-          </div>
-          <div id="needle" class="needle" style="left:0%"></div>
-        </div>
-        <div class="legend">
-          <span class="tag"><span class="dot warn"></span>Abaixo do peso (&lt;18.5)</span>
-          <span class="tag"><span class="dot ok"></span>Peso normal (18.5–24.9)</span>
-          <span class="tag"><span class="dot warn"></span>Sobrepeso (25–29.9)</span>
-          <span class="tag"><span class="dot bad"></span>Obesidade (≥30)</span>
-        </div>
-
-        <p class="muted">IMC isolado pode superestimar sobrepeso em quem tem muita massa magra. Por isso este IMC+ usa cintura/altura, % gordura (opcional) e nível de atividade.</p>
-      </section>
-
-      <!-- MACROS -->
-      <section class="card">
-        <h2>Macronutrientes Diários</h2>
-        <div class="row">
-          <div>
-            <label for="m_sexo">Sexo</label>
-            <select id="m_sexo"><option>Feminino</option><option selected>Masculino</option></select>
-          </div>
-          <div>
-            <label for="m_idade">Idade</label>
-            <input id="m_idade" type="number" min="10" max="100" placeholder="Ex.: 40" />
-          </div>
-          <div>
-            <label for="m_peso">Peso (kg)</label>
-            <input id="m_peso" type="number" step="0.1" placeholder="Ex.: 80" />
-          </div>
-          <div>
-            <label for="m_altura">Altura (cm)</label>
-            <input id="m_altura" type="number" placeholder="Ex.: 175" />
-          </div>
-          <div>
-            <label for="m_ati">Atividade</label>
-            <select id="m_ati">
-              <option>Sedentário</option>
-              <option>Levemente ativo</option>
-              <option selected>Moderadamente ativo</option>
-              <option>Muito ativo</option>
-            </select>
-          </div>
-          <div>
-            <label for="m_obj">Objetivo</label>
-            <select id="m_obj">
-              <option selected>Manter peso</option>
-              <option>Hipertrofia</option>
-              <option>Emagrecimento</option>
-            </select>
-          </div>
-        </div>
-        <button id="btnMacros">Calcular Macros</button>
-        <div class="kv" id="macros_out" aria-live="polite"></div>
-        <p class="muted">Estimativas; ajuste individual com profissional é recomendado.</p>
-      </section>
-    </div>
-
-    <!-- MICROS -->
-    <section class="card" style="margin-top:22px">
-      <h2>Micronutrientes Básicos (IDR)</h2>
-      <div class="row">
-        <div>
-          <label for="mic_idade">Idade</label>
-          <input id="mic_idade" type="number" min="10" max="100" />
-        </div>
-        <div>
-          <label for="mic_sexo">Sexo</label>
-          <select id="mic_sexo"><option>Feminino</option><option>Masculino</option></select>
-        </div>
-      </div>
-      <button id="btnMicros">Ver IDR</button>
-      <div class="kv" id="micros_out"></div>
-      <p class="muted">IDR simplificada para referência.</p>
+    <h1>Calculadora Nutrição & Performance</h1>
+    
+    <!-- CALCULADORA IMC -->
+    <section>
+        <h2>IMC (Índice de Massa Corporal)</h2>
+        <label>Peso (kg): <input id="imc_peso" type="number" step="0.1"></label>
+        <label>Altura (m): <input id="imc_altura" type="number" step="0.01"></label>
+        <button onclick="calculaIMC()">Calcular IMC</button>
+        <output id="imc_output"></output>
+        <span class="mini">IMC indica o balanço entre peso e altura. Não substitui avaliação clínica.</span>
     </section>
-  </main>
 
-  <footer>
-    <div class="wrap small">© VittaFlow • Ferramenta educativa – não substitui avaliação clínica.</div>
-  </footer>
+    <!-- CALCULADORA MACRONUTRIENTES -->
+    <section>
+        <h2>Macronutrientes Diários</h2>
+        <div class="multicol">
+            <div>
+                <label>Sexo:
+                    <select id="macro_sexo">
+                        <option>Feminino</option>
+                        <option>Masculino</option>
+                    </select>
+                </label>
+                <label>Idade: <input id="macro_idade" type="number" min="10"></label>
+                <label>Peso (kg): <input id="macro_peso" type="number" step="0.1"></label>
+                <label>Altura (cm): <input id="macro_altura" type="number"></label>
+                <label>Nível de atividade:
+                    <select id="macro_atividade">
+                        <option>Sedentário</option>
+                        <option>Levemente ativo</option>
+                        <option>Moderadamente ativo</option>
+                        <option>Muito ativo</option>
+                    </select>
+                </label>
+                <label>Objetivo:
+                    <select id="macro_objetivo">
+                        <option>Manter peso</option>
+                        <option>Hipertrofia</option>
+                        <option>Emagrecimento</option>
+                    </select>
+                </label>
+                <button onclick="calculaMacros()">Calcular Macros</button>
+            </div>
+            <div class="result" id="macro_output"></div>
+        </div>
+        <span class="mini">Estes valores são estimativas gerais. Consulte um nutricionista para adequação individual.</span>
+    </section>
 
-  <script>
-    function toggleQuadril(){
-      const isFem = document.getElementById('imc_sexo').value === 'Feminino';
-      document.getElementById('campo_quadril').style.display = isFem ? 'block' : 'none';
-    }
-    document.getElementById('imc_sexo').addEventListener('change', toggleQuadril);
+    <!-- CALCULADORA MICRONUTRIENTES -->
+    <section>
+        <h2>Micronutrientes Básicos (IDR)</h2>
+        <div class="multicol">
+            <div>
+                <label>Idade: <input id="micro_idade" type="number" min="10"></label>
+                <label>Sexo:
+                    <select id="micro_sexo">
+                        <option>Feminino</option>
+                        <option>Masculino</option>
+                    </select>
+                </label>
+                <button onclick="calculaMicros()">Ver IDR</button>
+            </div>
+            <div class="result" id="micro_output"></div>
+        </div>
+        <span class="mini">IDR: Ingestão diária recomendada segundo OMS. Valores ajustados segundo sexo/idade.</span>
+    </section>
 
-    // Barra IMC: posiciona ponteiro (0–50 clamp)
-    function setNeedle(imc){
-      const n=document.getElementById('needle');
-      const v=Math.max(0,Math.min(50,imc||0));
-      n.style.left = (v/50*100) + '%';
-    }
+    <script>
+        // IMC
+        function calculaIMC() {
+            const peso = parseFloat(document.getElementById('imc_peso').value);
+            const altura = parseFloat(document.getElementById('imc_altura').value);
+            if (!peso || !altura) return document.getElementById('imc_output').textContent = 'Preencha todos os campos.';
+            const imc = peso / (altura * altura);
+            let status = '';
+            if (imc < 18.5) status = 'Abaixo do peso';
+            else if (imc < 25) status = 'Peso normal';
+            else if (imc < 30) status = 'Sobrepeso';
+            else if (imc < 35) status = 'Obesidade grau I';
+            else if (imc < 40) status = 'Obesidade grau II';
+            else status = 'Obesidade grau III';
+            document.getElementById('imc_output').textContent = `IMC: ${imc.toFixed(2)} – ${status}`;
+        }
 
-    function whtrStatus(whtr){
-      if(whtr==null) return {t:'—', cor:'ok'};
-      if(whtr < 0.50) return {t:'Baixo risco', cor:'ok'};
-      if(whtr < 0.60) return {t:'Atenção', cor:'warn'};
-      return {t:'Alto risco', cor:'bad'};
-    }
+        // MACRONUTRIENTES (equação simplificada + macros padrão)
+        function calculaMacros() {
+            const sexo = document.getElementById('macro_sexo').value;
+            const idade = +document.getElementById('macro_idade').value;
+            const peso = +document.getElementById('macro_peso').value;
+            const altura = +document.getElementById('macro_altura').value;
+            const objetivo = document.getElementById('macro_objetivo').value;
+            const atividade = document.getElementById('macro_atividade').value;
 
-    // %Gordura (US Navy)
-    function estBF(sexo, cintura, pescoco, quadril, altura_cm){
-      const log10 = x => Math.log10(x);
-      if(sexo==='Masculino'){
-        if(!cintura || !pescoco || !altura_cm || cintura <= pescoco) return null;
-        return 495/(1.0324 - 0.19077*log10(cintura - pescoco) + 0.15456*log10(altura_cm)) - 450;
-      } else {
-        if(!cintura || !pescoco || !quadril || !altura_cm || (cintura+quadril) <= pescoco) return null;
-        return 495/(1.29579 - 0.35004*log10(cintura+quadril - pescoco) + 0.22100*log10(altura_cm)) - 450;
-      }
-    }
+            if (!idade || !peso || !altura) {
+                document.getElementById('macro_output').innerHTML = 'Preencha todos os campos.';
+                return;
+            }
 
-    function calcFFMI(peso, altura_m, bf_perc){
-      if(bf_perc==null) return null;
-      const massaMagra = peso * (1 - bf_perc/100);
-      const ffmi = massaMagra / (altura_m*altura_m);
-      const ffmiAdj = ffmi + 6.1*(1.8 - altura_m); // ajuste 1,80 m
-      return {ffmi, ffmiAdj};
-    }
+            let tmb = sexo === 'Feminino'
+                ? 655 + (9.6 * peso) + (1.8 * altura) - (4.7 * idade)
+                : 66 + (13.7 * peso) + (5 * altura) - (6.8 * idade);
 
-    function decideIMCPlus(imc, whtr, bf, ffmiAdj, atividade, sexo){
-      const cutBF = (sexo==='Masculino') ? 18 : 25;
-      const ativo = (atividade==='Moderadamente ativo' || atividade==='Muito ativo');
+            const fatores = {
+                "Sedentário": 1.2,
+                "Levemente ativo": 1.375,
+                "Moderadamente ativo": 1.55,
+                "Muito ativo": 1.725
+            };
+            let tdee = tmb * fatores[atividade];
 
-      let imcTxt = '';
-      if(imc < 18.5) imcTxt = 'Abaixo do peso';
-      else if(imc < 25) imcTxt = 'Peso normal';
-      else if(imc < 30) imcTxt = 'Sobrepeso';
-      else if(imc < 35) imcTxt = 'Obesidade grau I';
-      else if(imc < 40) imcTxt = 'Obesidade grau II';
-      else imcTxt = 'Obesidade grau III';
+            if (objetivo === "Emagrecimento") tdee -= 500;
+            if (objetivo === "Hipertrofia") tdee += 250;
 
-      const wh = whtrStatus(whtr);
-      const bfOk = (bf!=null && bf <= cutBF);
-      const musc = (ffmiAdj!=null && ffmiAdj >= 21);
+            let prot = peso * 2; // 2g/kg proteína
+            let gord = peso * 1; // 1g/kg gordura
+            let protKcal = prot * 4;
+            let gordKcal = gord * 9;
+            let carb = (tdee - (protKcal + gordKcal)) / 4;
 
-      if(imc >= 25 && ( (whtr!=null && whtr < 0.50) || bfOk || musc ) && ativo){
-        return {label:IMC ${imc.toFixed(2)} – elevado por massa magra, cor:'ok',
-                nota:${imcTxt}. WHtR ${whtr ? whtr.toFixed(2) : '—'} (${wh.t})
-                     + (bf!=null ? , %G ~ ${bf.toFixed(1)}% : '')
-                     + (ffmiAdj!=null ? , FFMI_adj ${ffmiAdj.toFixed(1)} : '')};
-      }
+            document.getElementById('macro_output').innerHTML =
+                `Calorias estimadas: <b>${Math.round(tdee)}</b> kcal/dia<br>
+                Proteínas: <b>${Math.round(prot)}g</b><br>
+                Carboidratos: <b>${Math.round(carb)}g</b><br>
+                Gorduras: <b>${Math.round(gord)}g</b>`;
+        }
 
-      const cor = (wh.cor==='ok' && imc<25) ? 'ok' : wh.cor;
-      return {label:IMC ${imc.toFixed(2)} – ${imcTxt}, cor,
-              nota:WHtR ${whtr ? whtr.toFixed(2) : '—'} (${wh.t})
-                   + (bf!=null ? , %G ~ ${bf.toFixed(1)}% : '')
-                   + (ffmiAdj!=null ? , FFMI_adj ${ffmiAdj.toFixed(1)} : '')};
-    }
-
-    function calcIMC(){
-      const peso = parseFloat(document.getElementById('imc_peso').value);
-      const alt  = parseFloat(document.getElementById('imc_altura').value);
-      const cintura = parseFloat(document.getElementById('imc_cintura').value);
-      const pescoco = parseFloat(document.getElementById('imc_pescoco').value);
-      const quadril = parseFloat(document.getElementById('imc_quadril')?.value);
-      const atividade = document.getElementById('imc_atividade').value;
-      const sexo = document.getElementById('imc_sexo').value;
-      const out  = document.getElementById('imc_out');
-
-      if(!peso || !alt){ out.textContent='Preencha peso e altura.'; return; }
-
-      const imc = peso/(alt*alt);
-      setNeedle(imc);
-
-      const whtr = (cintura && alt) ? (cintura/(alt*100)) : null;
-      const bf   = estBF(sexo, cintura, pescoco, quadril, alt*100);
-      const ffmi = (bf!=null) ? calcFFMI(peso, alt, bf) : null;
-
-      const dec = decideIMCPlus(imc, whtr, bf, ffmi?.ffmiAdj, atividade, sexo);
-      const cor = dec.cor==='ok' ? '#16a34a' : (dec.cor==='warn' ? '#f59e0b' : '#ef4444');
-      out.innerHTML = <span style="color:${cor}">${dec.label}</span><br><span class="muted">${dec.nota}</span>;
-    }
-
-    // ----- MACROS -----
-    function calcMacros(){
-      const sexo = document.getElementById('m_sexo').value;
-      const idade= +document.getElementById('m_idade').value;
-      const peso = +document.getElementById('m_peso').value;
-      const alt  = +document.getElementById('m_altura').value;
-      const ati  = document.getElementById('m_ati').value;
-      const obj  = document.getElementById('m_obj').value;
-      const out  = document.getElementById('macros_out');
-
-      if(!idade||!peso||!alt){ out.textContent='Preencha idade, peso e altura.'; return; }
-
-      let tmb = (sexo==='Feminino')
-        ? 655 + (9.6 * peso) + (1.8 * alt) - (4.7 * idade)
-        : 66  + (13.7* peso) + (5   * alt) - (6.8 * idade);
-
-      const fator = { "Sedentário":1.2, "Levemente ativo":1.375, "Moderadamente ativo":1.55, "Muito ativo":1.725 }[ati] || 1.55;
-      let tdee = tmb * fator;
-      if(obj==="Emagrecimento") tdee -= 500;
-      if(obj==="Hipertrofia")   tdee += 250;
-
-      const prot = Math.round(peso*2);
-      const gord = Math.round(peso*1);
-      const carb = Math.round( (tdee - (prot*4 + gord*9)) / 4 );
-      const kcal = Math.round(tdee);
-
-      out.innerHTML = `
-        <div><span>Calorias estimadas</span><strong>${kcal} kcal/dia</strong></div>
-        <div><span>Proteínas</span><strong>${prot} g</strong></div>
-        <div><span>Carboidratos</span><strong>${carb} g</strong></div>
-        <div><span>Gorduras</span><strong>${gord} g</strong></div>
-      `;
-    }
-
-    // ----- MICROS -----
-    function calcMicros(){
-      const idade = +document.getElementById('mic_idade').value;
-      const sexo  = document.getElementById('mic_sexo').value;
-      const out   = document.getElementById('micros_out');
-      if(!idade){ out.textContent='Preencha a idade.'; return; }
-
-      const fem = Ferro: 18 mg<br>Cálcio: 1000 mg<br>Vitamina C: 75 mg<br>Ácido fólico: 400 mcg<br>Zinco: 8 mg;
-      const mas = Ferro: 8 mg<br>Cálcio: 1000 mg<br>Vitamina C: 90 mg<br>Ácido fólico: 400 mcg<br>Zinco: 11 mg;
-      out.innerHTML = (sexo==='Feminino') ? fem : mas;
-    }
-
-    // Ligações de botões
-    document.getElementById('btnImc').addEventListener('click', calcIMC);
-    document.getElementById('btnMacros').addEventListener('click', calcMacros);
-    document.getElementById('btnMicros').addEventListener('click', calcMicros);
-  </script>
+        // MICRONUTRIENTES (valores simplificados)
+        function calculaMicros() {
+            const idade = +document.getElementById('micro_idade').value;
+            const sexo = document.getElementById('micro_sexo').value;
+            if (!idade) {
+                document.getElementById('micro_output').innerHTML = 'Preencha idade.';
+                return;
+            }
+            let micros = '';
+            if (sexo === 'Feminino') {
+                micros = `
+                    Ferro: 18 mg<br>
+                    Cálcio: 1000 mg<br>
+                    Vitamina C: 75 mg<br>
+                    Ácido fólico: 400 mcg<br>
+                    Zinco: 8 mg
+                `;
+            } else {
+                micros = `
+                    Ferro: 8 mg<br>
+                    Cálcio: 1000 mg<br>
+                    Vitamina C: 90 mg<br>
+                    Ácido fólico: 400 mcg<br>
+                    Zinco: 11 mg
+                `;
+            }
+            document.getElementById('micro_output').innerHTML = micros;
+        }
+    </script>
 </body>
 </html>
-
-
